@@ -1,0 +1,9 @@
+stages:
+  prepare_data:
+    cmd: python src/data/make_dataset.py --raw_data data/raw/drones_v1 
+      --processed_data data/processed/drones_dataset --classes airplane bird drone --split 0.7 0.2 0.1
+    deps:
+    - data/raw/
+    - src/data/make_dataset.py
+    outs:
+    - data/processed/

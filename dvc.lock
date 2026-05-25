@@ -1,0 +1,22 @@
+schema: '2.0'
+stages:
+  prepare_data:
+    cmd: python src/data/make_dataset.py --raw_data data/raw/drones_v1 
+      --processed_data data/processed/drones_dataset --classes airplane bird 
+      drone --split 0.7 0.2 0.1
+    deps:
+    - path: data/raw/
+      hash: md5
+      md5: c188546abb223b669cbff042efdad033.dir
+      size: 109602951
+      nfiles: 6234
+    - path: src/data/make_dataset.py
+      hash: md5
+      md5: dba776118e5c24453b276886fdb0419a
+      size: 3712
+    outs:
+    - path: data/processed/
+      hash: md5
+      md5: 8bbb7a58c12c21f5f21694a763612230.dir
+      size: 109590863
+      nfiles: 6233
