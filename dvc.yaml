@@ -7,3 +7,11 @@ stages:
     - src/data/make_dataset.py
     outs:
     - data/processed/
+  
+  train_model:
+    cmd: python src/train/train.py --data_yaml data/processed/drones_dataset/dataset.yaml --epochs 5 --n_trials 2 --model_output models/best.pt
+    deps:
+    - data/processed/
+    - src/train/train.py
+    outs:
+    - models/best.pt
