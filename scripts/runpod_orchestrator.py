@@ -90,11 +90,8 @@ def main():
     git clone https://x-access-token:{os.getenv('GITHUB_TOKEN')}@github.com/jmvazqueznicolas/drone-detection-mlops.git repo
     cd repo
     
-    echo "2. Instalando dependencias (Modo Shadowing)..."
-    # 1. Le decimos a Linux que busque los comandos de DVC y MLflow en la carpeta privada primero
-    export PATH="/root/.local/bin:$PATH"
-    
-    # 2. Usamos --user para que pip no pelee con Ubuntu instalando todo en la carpeta privada
+    echo "2. Instalando dependencias Shadowing..."
+    export PATH=/root/.local/bin:$PATH
     pip install --user --no-cache-dir -r requirements.txt --break-system-packages
     
     echo "3. Configurando credenciales..."
@@ -104,9 +101,9 @@ def main():
     echo "aws_secret_access_key = {os.getenv('AWS_SECRET_ACCESS_KEY')}" >> ~/.aws/credentials
     echo "region = us-east-1" >> ~/.aws/credentials
     
-    export MLFLOW_TRACKING_URI="{os.getenv('MLFLOW_TRACKING_URI')}"
-    export MLFLOW_TRACKING_USERNAME="{os.getenv('MLFLOW_TRACKING_USERNAME')}"
-    export MLFLOW_TRACKING_PASSWORD="{os.getenv('MLFLOW_TRACKING_PASSWORD')}"
+    export MLFLOW_TRACKING_URI='{os.getenv('MLFLOW_TRACKING_URI')}'
+    export MLFLOW_TRACKING_USERNAME='{os.getenv('MLFLOW_TRACKING_USERNAME')}'
+    export MLFLOW_TRACKING_PASSWORD='{os.getenv('MLFLOW_TRACKING_PASSWORD')}'
     
     echo "4. Ejecutando pipeline MLOps..."
     dvc pull || true
