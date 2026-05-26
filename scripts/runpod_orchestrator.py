@@ -26,9 +26,11 @@ def main():
                 name="MLOps-Training-GPU",
                 image_name="runpod/pytorch:1.0.2-cu1281-torch280-ubuntu2404",
                 gpu_type_id=gpu,
-                ports="22/tcp"
+                ports="22/tcp",
+                container_disk_in_gb=50,  # <-- Aumentamos el disco principal a 50 GB
+                volume_in_gb=50           # <-- Aumentamos el volumen extra a 50 GB
             )
-            print(f"✅ ¡Éxito! Instancia {gpu} reservada.")
+            print(f"✅ ¡Éxito! Instancia {gpu} reservada con 50GB de disco.")
             break  # Salimos del ciclo si tuvimos éxito
         except runpod.error.QueryError as e:
             print(f"⚠️ {gpu} sin capacidad en este momento.")
@@ -96,9 +98,9 @@ def main():
     source venv/bin/activate
     
     echo "3. Instalando dependencias..."
-    # Actualizamos pip e instalamos de forma aislada
+    # Actualizamos pip e instalamos sin guardar caché para ahorrar GBs de disco
     pip install --upgrade pip
-    pip install -r requirements.txt
+    pip install --no-cache-dir -r requirements.txt
     
     echo "4. Configurando credenciales..."
     export AWS_ACCESS_KEY_ID={os.getenv('AWS_ACCESS_KEY_ID')}
