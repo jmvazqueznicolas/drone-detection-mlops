@@ -1,3 +1,13 @@
 venv/
 .DS_Store
+# Secretos locales
 .env
+
+# Artefactos de MLflow y YOLO
+mlruns/
+runs/
+*.pt
+
+# Caché de Python
+__pycache__/
+*.pyc
