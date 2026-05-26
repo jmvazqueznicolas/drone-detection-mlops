@@ -81,6 +81,7 @@ def main():
     # 3. Exportar variables de AWS y MLflow
     # 4. Correr DVC
     # La lista de tareas que la GPU debe ejecutar
+    # La lista de tareas que la GPU debe ejecutar
     remote_script = f"""
     set -e  # Freno de emergencia: detiene el script si cualquier comando falla
     
@@ -89,11 +90,17 @@ def main():
     git clone https://x-access-token:{os.getenv('GITHUB_TOKEN')}@github.com/jmvazqueznicolas/drone-detection-mlops.git repo
     cd repo
     
-    echo "2. Instalando dependencias..."
-    # Forzamos la instalación global porque es una máquina efímera
-    python -m pip install -r requirements.txt --break-system-packages
+    echo "2. Preparando entorno virtual..."
+    # Creamos un entorno virtual y lo activamos para evitar conflictos con Linux
+    python -m venv venv
+    source venv/bin/activate
     
-    echo "3. Configurando credenciales..."
+    echo "3. Instalando dependencias..."
+    # Actualizamos pip e instalamos de forma aislada
+    pip install --upgrade pip
+    pip install -r requirements.txt
+    
+    echo "4. Configurando credenciales..."
     export AWS_ACCESS_KEY_ID={os.getenv('AWS_ACCESS_KEY_ID')}
     export AWS_SECRET_ACCESS_KEY={os.getenv('AWS_SECRET_ACCESS_KEY')}
     export AWS_DEFAULT_REGION=us-east-1
@@ -101,10 +108,11 @@ def main():
     export MLFLOW_TRACKING_USERNAME={os.getenv('MLFLOW_TRACKING_USERNAME')}
     export MLFLOW_TRACKING_PASSWORD={os.getenv('MLFLOW_TRACKING_PASSWORD')}
     
-    echo "4. Ejecutando pipeline MLOps..."
-    python -m dvc pull
-    python -m dvc repro
-    python -m dvc push
+    echo "5. Ejecutando pipeline MLOps..."
+    # Al estar el venv activado, dvc se ejecutará desde el entorno aislado
+    dvc pull
+    dvc repro
+    dvc push
     """
     
     # Ejecutamos el comando
