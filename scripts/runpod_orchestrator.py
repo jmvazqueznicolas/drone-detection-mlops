@@ -98,6 +98,11 @@ def main():
     
     echo "3. Instalando dependencias..."
     pip install --upgrade pip
+    
+    # 1. Instalamos explícitamente PyTorch con soporte CUDA desde el repositorio oficial
+    pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu121 --no-cache-dir
+    
+    # 2. Instalamos el resto de tus dependencias
     pip install --no-cache-dir -r requirements.txt
     
     echo "4. Configurando credenciales..."
