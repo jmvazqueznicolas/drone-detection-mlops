@@ -83,8 +83,6 @@ def main():
     # 3. Exportar variables de AWS y MLflow
     # 4. Correr DVC
     # La lista de tareas que la GPU debe ejecutar
-    # La lista de tareas que la GPU debe ejecutar
-    # La lista de tareas que la GPU debe ejecutar
     remote_script = f"""
     set -e  # Freno de emergencia
     
@@ -92,21 +90,11 @@ def main():
     git clone https://x-access-token:{os.getenv('GITHUB_TOKEN')}@github.com/jmvazqueznicolas/drone-detection-mlops.git repo
     cd repo
     
-    echo "2. Preparando entorno virtual..."
-    python -m venv venv
-    source venv/bin/activate
+    echo "2. Instalando dependencias adicionales..."
+    # NO creamos entorno virtual. Usamos el PyTorch preinstalado por RunPod.
+    pip install --no-cache-dir -r requirements.txt --break-system-packages
     
-    echo "3. Instalando dependencias..."
-    pip install --upgrade pip
-    
-    # 1. Instalamos explícitamente PyTorch con soporte CUDA desde el repositorio oficial
-    pip install torch torchvision torchaudio --index-url https://download.pytorch.org/whl/cu121 --no-cache-dir
-    
-    # 2. Instalamos el resto de tus dependencias
-    pip install --no-cache-dir -r requirements.txt
-    
-    echo "4. Configurando credenciales..."
-    # Usamos echo para evitar el bug de los espacios de EOF
+    echo "3. Configurando credenciales..."
     mkdir -p ~/.aws
     echo "[default]" > ~/.aws/credentials
     echo "aws_access_key_id = {os.getenv('AWS_ACCESS_KEY_ID')}" >> ~/.aws/credentials
@@ -117,8 +105,7 @@ def main():
     export MLFLOW_TRACKING_USERNAME="{os.getenv('MLFLOW_TRACKING_USERNAME')}"
     export MLFLOW_TRACKING_PASSWORD="{os.getenv('MLFLOW_TRACKING_PASSWORD')}"
     
-    echo "5. Ejecutando pipeline MLOps..."
-    # Agregamos '|| true' para que DVC descargue los datos y no aborte si falta el modelo viejo
+    echo "4. Ejecutando pipeline MLOps..."
     dvc pull || true
     dvc repro
     dvc push
