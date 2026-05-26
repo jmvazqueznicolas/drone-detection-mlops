@@ -90,9 +90,12 @@ def main():
     git clone https://x-access-token:{os.getenv('GITHUB_TOKEN')}@github.com/jmvazqueznicolas/drone-detection-mlops.git repo
     cd repo
     
-    echo "2. Instalando dependencias adicionales..."
-    # NO creamos entorno virtual. Usamos el PyTorch preinstalado por RunPod.
-    pip install --no-cache-dir -r requirements.txt --break-system-packages
+    echo "2. Instalando dependencias (Modo Shadowing)..."
+    # 1. Le decimos a Linux que busque los comandos de DVC y MLflow en la carpeta privada primero
+    export PATH="/root/.local/bin:$PATH"
+    
+    # 2. Usamos --user para que pip no pelee con Ubuntu instalando todo en la carpeta privada
+    pip install --user --no-cache-dir -r requirements.txt --break-system-packages
     
     echo "3. Configurando credenciales..."
     mkdir -p ~/.aws
