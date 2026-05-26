@@ -4,9 +4,9 @@ import shutil
 import logging
 import mlflow
 import optuna
-import os
+from pathlib import Path # <-- AGREGADO: Necesario para guardar el modelo final
 from dotenv import load_dotenv
-from ultralytics import YOLO
+from ultralytics import YOLO, settings # <-- AGREGADO: Importamos settings de Ultralytics
 
 # Silenciar logs excesivos de la librería para mantener la terminal limpia
 logging.getLogger("ultralytics").setLevel(logging.INFO)
@@ -36,7 +36,7 @@ def objective(trial, data_yaml):
             lr0=lr0,
             momentum=momentum,
             weight_decay=weight_decay,
-            device="cpu",  # Cambiar a 0 o "cuda" cuando estemos en RunPod
+            device=0,  # <-- CAMBIADO: Activamos la GPU 0 de RunPod
             plots=False,
             save=False,
             exist_ok=True
@@ -60,6 +60,9 @@ def main():
     parser.add_argument("--model_output", type=str, default="models/best.pt", help="Destino final del modelo entrenado")
     
     args = parser.parse_args()
+    
+    # <-- AGREGADO: Apagamos el autolog de YOLO para evitar el conflicto INVALID_PARAMETER_VALUE
+    settings.update({"mlflow": False})
     
     # Inicializamos el experimento en MLflow
     mlflow.set_experiment("drone-detection-yolo")
@@ -87,6 +90,7 @@ def main():
             lr0=best_params["lr0"],
             momentum=best_params["momentum"],
             weight_decay=best_params["weight_decay"],
+            device=0, # <-- CAMBIADO: Aseguramos el uso de GPU en el entrenamiento final
             project="models",
             name="yolo_drone_production",
             exist_ok=True
