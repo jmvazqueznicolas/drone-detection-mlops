@@ -81,18 +81,31 @@ def main():
     # 2. Instalar dependencias
     # 3. Exportar variables de AWS y MLflow
     # 4. Correr DVC
+    # La lista de tareas que la GPU debe ejecutar
     remote_script = f"""
-    git clone https://github.com/jmvazqueznicolas/drone-detection-mlops.git repo
+    set -e  # Freno de emergencia: detiene el script si cualquier comando falla
+    
+    echo "1. Clonando repositorio..."
+    # Usamos el token automático para saltar cualquier restricción de privacidad
+    git clone https://x-access-token:{os.getenv('GITHUB_TOKEN')}@github.com/jmvazqueznicolas/drone-detection-mlops.git repo
     cd repo
-    pip install -r requirements.txt
+    
+    echo "2. Instalando dependencias..."
+    # Usamos python -m para garantizar que instala en el entorno correcto
+    python -m pip install -r requirements.txt
+    
+    echo "3. Configurando credenciales..."
     export AWS_ACCESS_KEY_ID={os.getenv('AWS_ACCESS_KEY_ID')}
     export AWS_SECRET_ACCESS_KEY={os.getenv('AWS_SECRET_ACCESS_KEY')}
+    export AWS_DEFAULT_REGION=us-east-1
     export MLFLOW_TRACKING_URI={os.getenv('MLFLOW_TRACKING_URI')}
     export MLFLOW_TRACKING_USERNAME={os.getenv('MLFLOW_TRACKING_USERNAME')}
     export MLFLOW_TRACKING_PASSWORD={os.getenv('MLFLOW_TRACKING_PASSWORD')}
-    dvc pull
-    dvc repro
-    dvc push
+    
+    echo "4. Ejecutando pipeline MLOps..."
+    python -m dvc pull
+    python -m dvc repro
+    python -m dvc push
     """
     
     # Ejecutamos el comando
