@@ -122,9 +122,15 @@ def main():
             output_path.parent.mkdir(parents=True, exist_ok=True)
             shutil.copy(yolo_internal_best, args.model_output)
             
-            # Guardamos el modelo como un artefacto oficial
+            # 1. Subimos el archivo a la carpeta del Run (Artefacto)
             mlflow.log_artifact(args.model_output, artifact_path="production_model")
-            print(f"¡Pipeline finalizado! Modelo respaldado en: {args.model_output}")
+            
+            # <-- NUEVO: 2. Registramos el modelo en el Model Registry automáticamente
+            run_id = parent_run.info.run_id
+            model_uri = f"runs:/{run_id}/production_model"
+            mlflow.register_model(model_uri=model_uri, name="Drone-Detector-YOLO")
+            
+            print(f"¡Pipeline finalizado y modelo registrado! Respaldado en: {args.model_output}")
         else:
             print(f"Error: No se encontró el archivo de pesos. Se buscó en: {yolo_internal_best}")
             raise FileNotFoundError("YOLO no generó best.pt")
