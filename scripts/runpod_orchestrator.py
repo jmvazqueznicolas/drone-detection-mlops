@@ -42,15 +42,29 @@ def main():
     print(f"⏳ Pod {pod_id} creado. Esperando a que el servidor arranque...")
     
     # Esperamos a que la máquina esté encendida y asigne una IP
+    # Esperamos a que la máquina esté encendida y asigne una IP
     while True:
         pod_info = runpod.get_pod(pod_id)
-        if pod_info["desiredStatus"] == "RUNNING" and pod_info.get("runtime"):
-            ip = pod_info["runtime"]["ports"][0]["ip"]
-            port = pod_info["runtime"]["ports"][0]["externalPort"]
-            print(f"✅ Pod listo en IP: {ip} | Puerto: {port}")
-            break
+        if pod_info.get("desiredStatus") == "RUNNING" and pod_info.get("runtime"):
+            # Obtenemos la lista de todos los puertos expuestos
+            ports = pod_info["runtime"].get("ports", [])
+            
+            ip = None
+            port = None
+            
+            # Buscamos específicamente el que mapea al puerto 22 (SSH)
+            for p in ports:
+                if p.get("privatePort") == 22:
+                    ip = p.get("ip")
+                    port = p.get("publicPort")
+                    break
+                    
+            if ip and port:
+                print(f"✅ Pod listo en IP: {ip} | Puerto (SSH): {port}")
+                break
+                
         time.sleep(10)
-        print("Esperando 10 segundos más...")
+        print("Esperando 10 segundos a que RunPod asigne red...")
     
     # Damos 30 segundos extra para que el servicio SSH interno levante completamente
     time.sleep(30)
