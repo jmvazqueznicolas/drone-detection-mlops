@@ -113,7 +113,8 @@ def main():
     export MLFLOW_TRACKING_PASSWORD="{os.getenv('MLFLOW_TRACKING_PASSWORD')}"
     
     echo "5. Ejecutando pipeline MLOps..."
-    dvc pull
+    # Agregamos '|| true' para que DVC descargue los datos y no aborte si falta el modelo viejo
+    dvc pull || true
     dvc repro
     dvc push
     """
