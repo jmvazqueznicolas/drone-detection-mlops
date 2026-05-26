@@ -7,6 +7,7 @@ import optuna
 from pathlib import Path # <-- AGREGADO: Necesario para guardar el modelo final
 from dotenv import load_dotenv
 from ultralytics import YOLO, settings # <-- AGREGADO: Importamos settings de Ultralytics
+import datetime
 
 # Silenciar logs excesivos de la librería para mantener la terminal limpia
 logging.getLogger("ultralytics").setLevel(logging.INFO)
@@ -67,8 +68,12 @@ def main():
     # Inicializamos el experimento en MLflow
     mlflow.set_experiment("drone-detection-yolo-v2")
     
+    # Generamos un nombre dinámico: "yolo_pipeline_20260526_1430"
+    timestamp = datetime.datetime.now().strftime("%Y%m%d_%H%M")
+    run_name = f"yolo_pipeline_{timestamp}"
+
     # Iniciamos el Run Principal (Padre)
-    with mlflow.start_run(run_name="yolo_e2e_pipeline") as parent_run:
+    with mlflow.start_run(run_name=run_name) as parent_run:
         print(f"--- Iniciando Optimización Bayesiana ({args.n_trials} trials) ---")
         study = optuna.create_study(direction="maximize")
         study.optimize(lambda trial: objective(trial, args.data_yaml), n_trials=args.n_trials)
@@ -93,7 +98,8 @@ def main():
             device=0, 
             project="models",
             name="yolo_drone_production",
-            exist_ok=True
+            exist_ok=True,
+            patience=20
         )
         
         # <-- NUEVO: Validamos el modelo de producción para extraer sus métricas finales
