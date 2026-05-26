@@ -97,16 +97,18 @@ def main():
     python -m venv venv
     source venv/bin/activate
     
-    echo "3. Instalando dependencias..."
-    # Actualizamos pip e instalamos sin guardar caché para ahorrar GBs de disco
-    pip install --upgrade pip
-    pip install --no-cache-dir -r requirements.txt
-    
     echo "4. Configurando credenciales..."
-    # Envolvemos los tokens en comillas dobles para proteger caracteres especiales (+, /, =)
-    export AWS_ACCESS_KEY_ID="{os.getenv('AWS_ACCESS_KEY_ID')}"
-    export AWS_SECRET_ACCESS_KEY="{os.getenv('AWS_SECRET_ACCESS_KEY')}"
-    export AWS_DEFAULT_REGION="us-east-1"
+    
+    # Engañamos a DVC creando el archivo físico de perfil 'default' de AWS
+    mkdir -p ~/.aws
+    cat <<EOF > ~/.aws/credentials
+    [default]
+    aws_access_key_id = {os.getenv('AWS_ACCESS_KEY_ID')}
+    aws_secret_access_key = {os.getenv('AWS_SECRET_ACCESS_KEY')}
+    region = us-east-1
+    EOF
+
+    # MLflow sí lee variables de entorno sin problema
     export MLFLOW_TRACKING_URI="{os.getenv('MLFLOW_TRACKING_URI')}"
     export MLFLOW_TRACKING_USERNAME="{os.getenv('MLFLOW_TRACKING_USERNAME')}"
     export MLFLOW_TRACKING_PASSWORD="{os.getenv('MLFLOW_TRACKING_PASSWORD')}"
