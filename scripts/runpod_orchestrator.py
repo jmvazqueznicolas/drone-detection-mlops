@@ -42,7 +42,6 @@ def main():
     print(f"⏳ Pod {pod_id} creado. Esperando a que el servidor arranque...")
     
     # Esperamos a que la máquina esté encendida y asigne una IP
-    # Esperamos a que la máquina esté encendida y asigne una IP
     while True:
         pod_info = runpod.get_pod(pod_id)
         if pod_info.get("desiredStatus") == "RUNNING" and pod_info.get("runtime"):
@@ -91,8 +90,8 @@ def main():
     cd repo
     
     echo "2. Instalando dependencias..."
-    # Usamos python -m para garantizar que instala en el entorno correcto
-    python -m pip install -r requirements.txt
+    # Forzamos la instalación global porque es una máquina efímera
+    python -m pip install -r requirements.txt --break-system-packages
     
     echo "3. Configurando credenciales..."
     export AWS_ACCESS_KEY_ID={os.getenv('AWS_ACCESS_KEY_ID')}
