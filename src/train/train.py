@@ -90,11 +90,19 @@ def main():
             lr0=best_params["lr0"],
             momentum=best_params["momentum"],
             weight_decay=best_params["weight_decay"],
-            device=0, # <-- CAMBIADO: Aseguramos el uso de GPU en el entrenamiento final
+            device=0, 
             project="models",
             name="yolo_drone_production",
             exist_ok=True
         )
+        
+        # <-- NUEVO: Validamos el modelo de producción para extraer sus métricas finales
+        print("\n--- Validando el Modelo Final ---")
+        final_metrics = final_model.val()
+        final_map50_95 = final_metrics.box.map
+        
+        # <-- NUEVO: Registramos la métrica final en el Run Padre (yolo_e2e_pipeline)
+        mlflow.log_metric("production_mAP50_95", final_map50_95)
         
         # Mapeo y persistencia del artefacto de salida hacia la ruta que controlará DVC
         yolo_internal_best = final_model.trainer.best if hasattr(final_model, 'trainer') else None
