@@ -65,7 +65,7 @@ def main():
     settings.update({"mlflow": False})
     
     # Inicializamos el experimento en MLflow
-    mlflow.set_experiment("drone-detection-yolo")
+    mlflow.set_experiment("drone-detection-yolo-v2")
     
     # Iniciamos el Run Principal (Padre)
     with mlflow.start_run(run_name="yolo_e2e_pipeline") as parent_run:
