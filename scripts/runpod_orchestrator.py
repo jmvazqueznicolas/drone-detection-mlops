@@ -49,7 +49,7 @@ def main():
     # 3. Exportar variables de AWS y MLflow
     # 4. Correr DVC
     remote_script = f"""
-    git clone https://github.com/TuUsuario/drone-detection-mlops.git repo
+    git clone https://github.com/jmvazqueznicolas/drone-detection-mlops.git repo
     cd repo
     pip install -r requirements.txt
     export AWS_ACCESS_KEY_ID={os.getenv('AWS_ACCESS_KEY_ID')}
