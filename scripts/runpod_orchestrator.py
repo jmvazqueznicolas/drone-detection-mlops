@@ -103,12 +103,13 @@ def main():
     pip install --no-cache-dir -r requirements.txt
     
     echo "4. Configurando credenciales..."
-    export AWS_ACCESS_KEY_ID={os.getenv('AWS_ACCESS_KEY_ID')}
-    export AWS_SECRET_ACCESS_KEY={os.getenv('AWS_SECRET_ACCESS_KEY')}
-    export AWS_DEFAULT_REGION=us-east-1
-    export MLFLOW_TRACKING_URI={os.getenv('MLFLOW_TRACKING_URI')}
-    export MLFLOW_TRACKING_USERNAME={os.getenv('MLFLOW_TRACKING_USERNAME')}
-    export MLFLOW_TRACKING_PASSWORD={os.getenv('MLFLOW_TRACKING_PASSWORD')}
+    # Envolvemos los tokens en comillas dobles para proteger caracteres especiales (+, /, =)
+    export AWS_ACCESS_KEY_ID="{os.getenv('AWS_ACCESS_KEY_ID')}"
+    export AWS_SECRET_ACCESS_KEY="{os.getenv('AWS_SECRET_ACCESS_KEY')}"
+    export AWS_DEFAULT_REGION="us-east-1"
+    export MLFLOW_TRACKING_URI="{os.getenv('MLFLOW_TRACKING_URI')}"
+    export MLFLOW_TRACKING_USERNAME="{os.getenv('MLFLOW_TRACKING_USERNAME')}"
+    export MLFLOW_TRACKING_PASSWORD="{os.getenv('MLFLOW_TRACKING_PASSWORD')}"
     
     echo "5. Ejecutando pipeline MLOps..."
     # Al estar el venv activado, dvc se ejecutará desde el entorno aislado
