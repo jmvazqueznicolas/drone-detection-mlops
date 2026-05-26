@@ -9,16 +9,35 @@ runpod.api_key = os.getenv("RUNPOD_API_KEY")
 def main():
     print("🚀 Paso 1: Solicitando instancia GPU en RunPod...")
     
-    # Creamos el Pod. Asegúrate de que el template_id coincida con el tuyo 
-    # (El ID lo puedes ver en la URL al configurar un template en RunPod)
-    # Por defecto, dejaremos la RTX 4090 On-Demand.
-    pod = runpod.create_pod(
-        name="MLOps-Training-GPU",
-        image_name="runpod/pytorch:1.0.2-cu1281-torch280-ubuntu2404",
-        gpu_type_id="NVIDIA GeForce RTX 4090",
-        ports="22/tcp" # Vital para el SSH
-    )
+    # Lista de GPUs ordenadas por tu preferencia
+    gpu_preferences = [
+        "NVIDIA GeForce RTX 4090",
+        "NVIDIA RTX A6000",
+        "NVIDIA RTX A4000"
+    ]
     
+    pod = None
+    
+    # Mecanismo de Fallback: Intentamos rentar una por una
+    for gpu in gpu_preferences:
+        print(f"Buscando disponibilidad para: {gpu}...")
+        try:
+            pod = runpod.create_pod(
+                name="MLOps-Training-GPU",
+                image_name="runpod/pytorch:1.0.2-cu1281-torch280-ubuntu2404",
+                gpu_type_id=gpu,
+                ports="22/tcp"
+            )
+            print(f"✅ ¡Éxito! Instancia {gpu} reservada.")
+            break  # Salimos del ciclo si tuvimos éxito
+        except runpod.error.QueryError as e:
+            print(f"⚠️ {gpu} sin capacidad en este momento.")
+            
+    # Si terminamos el ciclo y 'pod' sigue siendo None, ninguna estuvo disponible
+    if not pod:
+        print("❌ Error crítico: Ninguna de las GPUs solicitadas está disponible en RunPod.")
+        exit(1)  # Forzamos un error para que GitHub Actions se detenga y se ponga en rojo
+        
     pod_id = pod["id"]
     print(f"⏳ Pod {pod_id} creado. Esperando a que el servidor arranque...")
     
