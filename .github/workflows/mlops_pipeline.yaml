@@ -1,0 +1,43 @@
+name: Continuous Training Pipeline
+
+# Este pipeline se dispara automáticamente cuando haces push a la rama 'main'
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  train_on_gpu:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout Code
+        uses: actions/checkout@v3
+
+      - name: Encender GPU en RunPod y ejecutar DVC
+        # Aquí usamos un script de bash para llamar a la API de RunPod, 
+        # pedirle una GPU, inyectarle el código, correr 'dvc repro', y apagarla.
+        env:
+          RUNPOD_API_KEY: ${{ secrets.RUNPOD_API_KEY }}
+          # Inyectamos credenciales de AWS para DVC
+          AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          AWS_DEFAULT_REGION: us-east-1 
+          # Inyectamos credenciales de MLflow
+          MLFLOW_TRACKING_URI: "https://dagshub.com/TuUsuario/drone-detection-mlops.mlflow"
+          MLFLOW_TRACKING_USERNAME: ${{ secrets.MLFLOW_TRACKING_USERNAME }}
+          MLFLOW_TRACKING_PASSWORD: ${{ secrets.MLFLOW_TRACKING_PASSWORD }}
+        run: |
+          echo "Iniciando orquestación con RunPod..."
+          # Instalamos una herramienta CLI rápida de RunPod
+          pip install runpod --quiet
+          
+          # En un proyecto E2E avanzado, aquí enviaríamos un comando SSH a RunPod
+          # ordenándole hacer el git clone de nuestro repo, instalar requirements.txt
+          # y ejecutar `dvc repro`.
+          
+          # Dado que configurar SSH en frío puede ser complejo por permisos, 
+          # ¿te gustaría que te muestre un script de Python auxiliar que automatice 
+          # este levantamiento (crear el pod, mandar el código, apagarlo) usando 
+          # el SDK nativo de RunPod?
+          echo "Este bloque controlará la GPU en la nube."

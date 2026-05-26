@@ -4,10 +4,14 @@ import shutil
 import logging
 import mlflow
 import optuna
+import os
+from dotenv import load_dotenv
 from ultralytics import YOLO
 
 # Silenciar logs excesivos de la librería para mantener la terminal limpia
-logging.getLogger("ultralytics").setLevel(logging.WARNING)
+logging.getLogger("ultralytics").setLevel(logging.INFO)
+# Cargar variables de entorno desde el archivo .env
+load_dotenv()
 
 def objective(trial, data_yaml):
     """
@@ -89,17 +93,23 @@ def main():
         )
         
         # Mapeo y persistencia del artefacto de salida hacia la ruta que controlará DVC
-        yolo_internal_best = os.path.join("models", "yolo_drone_production", "weights", "best.pt")
-        if os.path.exists(yolo_internal_best):
+        yolo_internal_best = final_model.trainer.best if hasattr(final_model, 'trainer') else None
+        
+        # Fallback por si usamos otra versión de Ultralytics
+        if not yolo_internal_best or not os.path.exists(yolo_internal_best):
+             yolo_internal_best = os.path.join("models", "yolo_drone_production", "weights", "best.pt")
+
+        if yolo_internal_best and os.path.exists(yolo_internal_best):
             output_path = Path(args.model_output)
             output_path.parent.mkdir(parents=True, exist_ok=True)
             shutil.copy(yolo_internal_best, args.model_output)
             
-            # Guardamos el modelo como un artefacto oficial en el servidor de MLflow
+            # Guardamos el modelo como un artefacto oficial
             mlflow.log_artifact(args.model_output, artifact_path="production_model")
             print(f"¡Pipeline finalizado! Modelo respaldado en: {args.model_output}")
         else:
-            print("Error: No se encontró el archivo de pesos generado por Ultralytics.")
+            print(f"Error: No se encontró el archivo de pesos. Se buscó en: {yolo_internal_best}")
+            raise FileNotFoundError("YOLO no generó best.pt")
 
 if __name__ == "__main__":
     main()
