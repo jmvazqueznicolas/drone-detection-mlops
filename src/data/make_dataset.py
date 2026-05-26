@@ -61,7 +61,8 @@ def split_and_copy_data(raw_dir, processed_dir, split_ratio, seed=42):
 def create_yaml_config(processed_dir, classes):
     """Genera el dataset.yaml para Ultralytics, apuntando a train, val y test."""
     data = {
-        'path': os.path.abspath(processed_dir),
+        # Esta es la ruta relativa desde la raíz del proyecto
+        'path': 'data/processed/drones_dataset',
         'train': 'images/train',
         'val': 'images/val',
         'test': 'images/test',
