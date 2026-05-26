@@ -84,37 +84,35 @@ def main():
     # 4. Correr DVC
     # La lista de tareas que la GPU debe ejecutar
     # La lista de tareas que la GPU debe ejecutar
+    # La lista de tareas que la GPU debe ejecutar
     remote_script = f"""
-    set -e  # Freno de emergencia: detiene el script si cualquier comando falla
+    set -e  # Freno de emergencia
     
     echo "1. Clonando repositorio..."
-    # Usamos el token automático para saltar cualquier restricción de privacidad
     git clone https://x-access-token:{os.getenv('GITHUB_TOKEN')}@github.com/jmvazqueznicolas/drone-detection-mlops.git repo
     cd repo
     
     echo "2. Preparando entorno virtual..."
-    # Creamos un entorno virtual y lo activamos para evitar conflictos con Linux
     python -m venv venv
     source venv/bin/activate
     
-    echo "4. Configurando credenciales..."
+    echo "3. Instalando dependencias..."
+    pip install --upgrade pip
+    pip install --no-cache-dir -r requirements.txt
     
-    # Engañamos a DVC creando el archivo físico de perfil 'default' de AWS
+    echo "4. Configurando credenciales..."
+    # Usamos echo para evitar el bug de los espacios de EOF
     mkdir -p ~/.aws
-    cat <<EOF > ~/.aws/credentials
-    [default]
-    aws_access_key_id = {os.getenv('AWS_ACCESS_KEY_ID')}
-    aws_secret_access_key = {os.getenv('AWS_SECRET_ACCESS_KEY')}
-    region = us-east-1
-    EOF
-
-    # MLflow sí lee variables de entorno sin problema
+    echo "[default]" > ~/.aws/credentials
+    echo "aws_access_key_id = {os.getenv('AWS_ACCESS_KEY_ID')}" >> ~/.aws/credentials
+    echo "aws_secret_access_key = {os.getenv('AWS_SECRET_ACCESS_KEY')}" >> ~/.aws/credentials
+    echo "region = us-east-1" >> ~/.aws/credentials
+    
     export MLFLOW_TRACKING_URI="{os.getenv('MLFLOW_TRACKING_URI')}"
     export MLFLOW_TRACKING_USERNAME="{os.getenv('MLFLOW_TRACKING_USERNAME')}"
     export MLFLOW_TRACKING_PASSWORD="{os.getenv('MLFLOW_TRACKING_PASSWORD')}"
     
     echo "5. Ejecutando pipeline MLOps..."
-    # Al estar el venv activado, dvc se ejecutará desde el entorno aislado
     dvc pull
     dvc repro
     dvc push
